@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maika - ADMIN</title>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Petits ajustements spécifiques à l'Admin seulement */
+        .card-stat { background: linear-gradient(135deg, rgba(255,255,255,0.05), rgba(255,255,255,0.01)); border-radius: 16px; padding: 20px; border: 1px solid rgba(255,255,255,0.1); }
+        .badge-pending { background: #f59e0b; color: black; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+        .badge-verified { background: #10b981; color: black; padding: 4px 8px; border-radius: 6px; font-size: 10px; font-weight: 800; letter-spacing: 1px; }
+    </style>
+</head>
+<body class="p-6 overflow-auto"> <div class="ambient-light">
+        <div class="orb orb-1"></div>
+        <div class="orb orb-2"></div>
+    </div>
+
+    <div class="relative z-10 flex justify-between items-center mb-8 glass p-4 rounded-2xl">
+        <div>
+            <h1 class="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-white">MAIKA <span class="text-white font-light">CONTROL</span></h1>
+            <p class="text-gray-400 text-xs">Gestion de la flotte</p>
+        </div>
+        <button onclick="logout()" class="text-red-400 hover:bg-red-500/10 px-4 py-2 rounded-lg transition"><i class="fas fa-power-off mr-2"></i>Sortir</button>
+    </div>
+
+    <div class="relative z-10 grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div class="card-stat">
+            <p class="text-indigo-300 text-xs uppercase font-bold mb-1">Prestataires</p>
+            <h2 class="text-3xl font-bold text-white" id="statDrivers">-</h2>
+        </div>
+        <div class="card-stat">
+            <p class="text-purple-300 text-xs uppercase font-bold mb-1">Courses</p>
+            <h2 class="text-3xl font-bold text-white" id="statRides">-</h2>
+        </div>
+        <div class="card-stat">
+            <p class="text-yellow-300 text-xs uppercase font-bold mb-1">En Attente</p>
+            <h2 class="text-3xl font-bold text-yellow-400" id="statPending">-</h2>
+        </div>
+        <div class="card-stat">
+            <p class="text-green-300 text-xs uppercase font-bold mb-1">Volume (Ar)</p>
+            <h2 class="text-3xl font-bold text-green-400" id="statRevenue">-</h2>
+        </div>
+    </div>
+
+    <div class="relative z-10 mb-8">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-white"><i class="fas fa-user-shield text-indigo-500"></i> Vérification Prestataires</h3>
+        <div class="glass rounded-xl overflow-hidden shadow-2xl">
+            <table class="w-full text-left text-sm text-gray-400">
+                <thead class="bg-indigo-500/10 text-indigo-200 uppercase font-bold text-xs">
+                    <tr>
+                        <th class="p-4">Contact</th>
+                        <th class="p-4">Statut</th>
+                        <th class="p-4 text-right">Action</th>
+                    </tr>
+                </thead>
+                <tbody id="driversList" class="divide-y divide-gray-700/50">
+                    <tr><td colspan="3" class="p-6 text-center text-gray-500">Chargement...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="relative z-10">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2 text-white"><i class="fas fa-satellite-dish text-green-500"></i> Activité Récente</h3>
+        <div class="glass rounded-xl p-4 space-y-3" id="ridesList">
+            </div>
+    </div>
+
+    <script>
+        // CONFIG SUPABASE (La même que main.js)
+        const SUPABASE_URL = 'https://ezlwdyvpyerxgrrvxdwl.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6bHdkeXZweWVyeGdycnZ4ZHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2ODMzNjAsImV4cCI6MjA4MTI1OTM2MH0.6ZFmMAF5rzZ6-XP5Owae-v_SEEnySUScPAyXqRHDiiA';
+        const { createClient } = supabase;
+        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        // --- INIT ---
+        async function init() {
+            // Vérif session
+            const { data: { session } } = await db.auth.getSession();
+            if(!session) {
+                // Si pas connecté, on redirige vers l'accueil ou on demande login
+                const email = prompt("Email Admin :");
+                const password = prompt("Mot de passe :");
+                if(email && password) {
+                    const { error } = await db.auth.signInWithPassword({ email, password });
+                    if(error) { alert("Accès refusé"); window.location.href = 'index.html'; }
+                } else {
+                    window.location.href = 'index.html';
+                }
+            }
+            loadStats();
+            loadDrivers();
+            loadRecentRides();
+        }
+
+        // --- FONCTIONS ---
+        async function loadStats() {
+            const { count: drivers } = await db.from('profiles').select('*', { count: 'exact', head: true }).eq('role', 'driver');
+            const { count: rides } = await db.from('rides').select('*', { count: 'exact', head: true });
+            const { count: pending } = await db.from('profiles').select('*', { count: 'exact', head: true }).eq('verification_status', 'pending').eq('role', 'driver');
+            
+            document.getElementById('statDrivers').innerText = drivers || 0;
+            document.getElementById('statRides').innerText = rides || 0;
+            document.getElementById('statPending').innerText = pending || 0;
+
+            // Calcul rapide CA
+            const { data: ca } = await db.from('rides').select('price_proposed, budget_proposed').eq('status', 'accepted');
+            let total = 0;
+            if(ca) ca.forEach(r => total += (r.price_proposed || r.budget_proposed || 0));
+            document.getElementById('statRevenue').innerText = (total / 1000).toFixed(0) + " k"; // Affichage en "k Ar"
+        }
+
+        async function loadDrivers() {
+            const { data: drivers } = await db.from('profiles').select('*').eq('role', 'driver').order('created_at', { ascending: false }).limit(10);
+            const tbody = document.getElementById('driversList');
+            tbody.innerHTML = '';
+            
+            if(!drivers || drivers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="p-6 text-center text-gray-500">Aucun prestataire inscrit</td></tr>';
+                return;
+            }
+
+            drivers.forEach(d => {
+                const verified = d.verification_status === 'verified';
+                const btn = verified 
+                    ? `<span class="text-gray-600 text-xs italic">Déjà validé</span>`
+                    : `<button onclick="verifyDriver('${d.id}')" class="btn-gradient px-3 py-1 rounded-lg text-xs font-bold shadow-lg">VALIDER</button>`;
+                
+                const row = `
+                    <tr class="hover:bg-white/5 transition">
+                        <td class="p-4"><p class="font-bold text-white">${d.phone || 'Inconnu'}</p><p class="text-xs font-mono opacity-50">${d.id.substring(0,6)}...</p></td>
+                        <td class="p-4"><span class="${verified ? 'badge-verified' : 'badge-pending'}">${d.verification_status}</span></td>
+                        <td class="p-4 text-right">${btn}</td>
+                    </tr>
+                `;
+                tbody.innerHTML += row;
+            });
+        }
+
+        async function verifyDriver(id) {
+            if(confirm("Confirmer ce prestataire ?")) {
+                await db.from('profiles').update({ verification_status: 'verified' }).eq('id', id);
+                loadDrivers(); loadStats();
+            }
+        }
+
+        async function loadRecentRides() {
+            const list = document.getElementById('ridesList');
+            // Live Update
+            db.channel('admin-live').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'rides' }, payload => {
+                renderRide(payload.new, list, true);
+            }).subscribe();
+
+            const { data: rides } = await db.from('rides').select('*').order('created_at', { ascending: false }).limit(5);
+            list.innerHTML = '';
+            if(rides) rides.forEach(r => renderRide(r, list));
+        }
+
+        function renderRide(r, container, top = false) {
+            const item = document.createElement('div');
+            item.className = `flex justify-between items-center p-3 rounded-lg border-l-4 ${r.status === 'accepted' ? 'border-green-500 bg-green-500/5' : 'border-yellow-500 bg-yellow-500/5'}`;
+            item.innerHTML = `
+                <div>
+                    <p class="font-bold text-sm text-white">${r.destination_address}</p>
+                    <p class="text-xs text-gray-400">${r.service_type || 'Course'}</p>
+                </div>
+                <div class="text-right">
+                    <p class="font-bold text-indigo-300">${r.price_proposed || r.budget_proposed || '?'} Ar</p>
+                </div>
+            `;
+            if(top) container.prepend(item); else container.appendChild(item);
+        }
+
+        async function logout() { await db.auth.signOut(); window.location.href = 'index.html'; }
+
+        init();
+    </script>
+</body>
+</html>

@@ -6,59 +6,15 @@
     <title>Maika - Premium</title>
     
     <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+    <link rel="stylesheet" href="style.css">
+
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#0f172a">
-
-    <style>
-        /* --- DESIGN SYSTEM PREMIUM --- */
-        * { font-family: 'Plus Jakarta Sans', sans-serif; -webkit-tap-highlight-color: transparent; box-sizing: border-box; touch-action: manipulation; }
-        body { background: #0f172a; color: white; overflow: hidden; height: 100vh; width: 100vw; }
-        
-        /* Background animé subtil */
-        .ambient-light { position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 0; overflow: hidden; }
-        .orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.4; animation: float 10s infinite ease-in-out; }
-        .orb-1 { width: 300px; height: 300px; background: #6366f1; top: -10%; right: -10%; animation-delay: 0s; }
-        .orb-2 { width: 250px; height: 250px; background: #06b6d4; bottom: -10%; left: -10%; animation-delay: -5s; }
-        @keyframes float { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(30px, -30px); } }
-
-        /* UI Elements */
-        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
-        .glass-panel { background: rgba(15, 23, 42, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border-top: 1px solid rgba(255, 255, 255, 0.1); }
-        .btn-gradient { background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); transition: transform 0.2s; }
-        .btn-gradient:active { transform: scale(0.98); }
-        
-        /* Transitions d'écrans */
-        .screen { position: absolute; inset: 0; opacity: 0; visibility: hidden; transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); transform: scale(0.95); pointer-events: none; z-index: 10; display: flex; flex-direction: column; }
-        .screen.active { opacity: 1; visibility: visible; transform: scale(1); pointer-events: auto; }
-        
-        /* Map Styling */
-        #map-view { position: absolute; inset: 0; z-index: 1; }
-        .leaflet-container { background: #0f172a; }
-        
-        /* Bottom Sheet Animation */
-        .bottom-sheet { position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); z-index: 50; }
-        .bottom-sheet.open { transform: translateY(0); }
-
-        /* Pin Animation */
-        .center-pin { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -100%); z-index: 40; pointer-events: none; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .center-pin.hovering { transform: translate(-50%, -140%) scale(1.1); }
-        .pin-shadow { width: 12px; height: 4px; background: rgba(0,0,0,0.5); border-radius: 50%; position: absolute; bottom: -2px; left: 50%; transform: translateX(-50%); filter: blur(2px); }
-
-        /* Inputs */
-        .input-box { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); transition: all 0.3s; }
-        .input-box:focus-within { border-color: #6366f1; background: rgba(99, 102, 241, 0.05); }
-
-        /* Toast */
-        .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-150%); z-index: 9999; transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        .toast.show { transform: translateX(-50%) translateY(0); }
-    </style>
 </head>
 <body>
 
@@ -83,19 +39,16 @@
                 <h1 class="text-3xl font-bold mb-2">Bienvenue</h1>
                 <p class="text-gray-400">Entrez votre numéro pour commencer</p>
             </div>
-            
             <div class="input-box rounded-2xl p-4 flex items-center gap-4 mb-6">
                 <i class="fas fa-phone-alt text-gray-400"></i>
                 <div class="h-6 w-px bg-gray-700"></div>
                 <input type="tel" id="phoneInput" placeholder="34 00 000 00" class="bg-transparent outline-none w-full text-lg font-medium">
             </div>
-
             <button onclick="authLogin()" class="btn-gradient w-full py-4 rounded-2xl font-bold text-lg mb-6 relative overflow-hidden">
                 <span class="relative z-10">Connexion</span>
             </button>
-
             <div onclick="toggleDriverMode()" class="text-center py-4 cursor-pointer opacity-70 hover:opacity-100 transition">
-                <p class="text-xs uppercase tracking-widest font-semibold" id="driverModeText">Passer en mode Chauffeur</p>
+                <p class="text-xs uppercase tracking-widest font-semibold" id="driverModeText">Passer en mode Prestataire</p>
             </div>
         </div>
     </div>
@@ -107,33 +60,24 @@
                     <p class="text-gray-400 text-sm">Bonjour,</p>
                     <h2 class="text-2xl font-bold" id="userName">Voyageur</h2>
                 </div>
-                <div onclick="logout()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-red-400 cursor-pointer">
-                    <i class="fas fa-power-off"></i>
-                </div>
+                <div onclick="logout()" class="w-10 h-10 rounded-full glass flex items-center justify-center text-red-400 cursor-pointer"><i class="fas fa-power-off"></i></div>
             </div>
-
             <div onclick="openMapMode()" class="glass rounded-3xl p-6 mb-6 relative overflow-hidden group active:scale-95 transition-all duration-300 cursor-pointer">
                 <div class="absolute inset-0 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 opacity-0 group-hover:opacity-100 transition"></div>
                 <div class="relative z-10 flex justify-between items-center">
                     <div>
-                        <div class="w-12 h-12 rounded-2xl bg-indigo-500 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30">
-                            <i class="fas fa-car-alt text-xl"></i>
-                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-500 flex items-center justify-center mb-4 shadow-lg shadow-indigo-500/30"><i class="fas fa-car-alt text-xl"></i></div>
                         <h3 class="text-xl font-bold mb-1">Commander</h3>
-                        <p class="text-sm text-gray-400">Course immédiate en ville</p>
+                        <p class="text-sm text-gray-400">Course immédiate</p>
                     </div>
                     <i class="fas fa-chevron-right text-gray-500"></i>
                 </div>
             </div>
-
             <div class="glass rounded-3xl p-6 relative overflow-hidden opacity-75">
                 <div class="relative z-10">
-                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400">
-                        <i class="fas fa-map-marked-alt text-xl"></i>
-                    </div>
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center mb-4 text-cyan-400"><i class="fas fa-map-marked-alt text-xl"></i></div>
                     <h3 class="text-xl font-bold mb-1">Location</h3>
-                    <p class="text-sm text-gray-400">Longue distance & Province</p>
-                    <span class="absolute top-6 right-6 text-xs bg-white/10 px-2 py-1 rounded">Bientôt</span>
+                    <p class="text-sm text-gray-400">Province & Long trajet</p>
                 </div>
             </div>
         </div>
@@ -143,9 +87,7 @@
         <div id="map-view"></div>
         
         <div class="absolute top-0 left-0 w-full p-4 pt-12 z-20 flex items-start gap-3 pointer-events-none">
-            <button onclick="nav('homeScreen')" class="w-10 h-10 rounded-full glass-panel text-white flex items-center justify-center pointer-events-auto shadow-lg">
-                <i class="fas fa-arrow-left"></i>
-            </button>
+            <button onclick="nav('homeScreen')" class="w-10 h-10 rounded-full glass-panel text-white flex items-center justify-center pointer-events-auto shadow-lg"><i class="fas fa-arrow-left"></i></button>
             <div class="glass-panel px-4 py-2 rounded-full flex items-center gap-2 shadow-lg max-w-[70%] pointer-events-auto">
                 <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
                 <p class="text-xs font-medium truncate" id="addressBadge">Localisation...</p>
@@ -153,15 +95,11 @@
         </div>
 
         <div class="center-pin" id="mapPin">
-            <div class="relative">
-                <i class="fas fa-map-marker-alt text-5xl text-indigo-500 filter drop-shadow-xl"></i>
-                <div class="pin-shadow"></div>
-            </div>
+            <div class="relative"><i class="fas fa-map-marker-alt text-5xl text-indigo-500 filter drop-shadow-xl"></i><div class="pin-shadow"></div></div>
         </div>
 
         <div class="bottom-sheet glass-panel rounded-t-3xl p-6 open" id="orderSheet">
             <div class="w-12 h-1 bg-gray-600 rounded-full mx-auto mb-6"></div>
-            
             <div class="mb-6">
                 <label class="text-xs text-gray-400 uppercase font-bold tracking-wider mb-2 block">Destination</label>
                 <div class="input-box rounded-xl p-3 flex items-center gap-3">
@@ -169,327 +107,37 @@
                     <input type="text" id="destInput" placeholder="Où allez-vous ?" class="bg-transparent w-full outline-none font-medium" readonly>
                 </div>
             </div>
-
-            <div class="grid grid-cols-2 gap-3 mb-6">
-                <div class="glass p-3 rounded-xl border-indigo-500 bg-indigo-500/10 flex items-center gap-3 cursor-pointer">
-                    <img src="https://img.icons8.com/color/48/motorcycle.png" class="w-8 h-8">
-                    <div>
-                        <p class="font-bold text-sm">Moto</p>
-                        <p class="text-xs text-gray-400">Rapide</p>
-                    </div>
-                </div>
-                <div class="glass p-3 rounded-xl opacity-50 flex items-center gap-3 cursor-pointer">
-                    <img src="https://img.icons8.com/color/48/fiat-500.png" class="w-8 h-8">
-                    <div>
-                        <p class="font-bold text-sm">Voiture</p>
-                        <p class="text-xs text-gray-400">Confort</p>
-                    </div>
-                </div>
-            </div>
-
-            <button onclick="createRequest()" id="btnRequest" class="btn-gradient w-full py-4 rounded-xl font-bold shadow-lg">
-                Trouver un chauffeur
-            </button>
+            <button onclick="createRequest()" id="btnRequest" class="btn-gradient w-full py-4 rounded-xl font-bold shadow-lg">Trouver un véhicule</button>
         </div>
 
         <div class="bottom-sheet glass-panel rounded-t-3xl p-6" id="trackingSheet">
             <div class="flex items-center justify-between mb-6">
                 <div>
-                    <h2 class="text-xl font-bold text-white">Chauffeur trouvé !</h2>
+                    <h2 class="text-xl font-bold text-white">Véhicule trouvé !</h2>
                     <p class="text-indigo-400 text-sm">Arrivée estimée : 4 min</p>
                 </div>
                 <div class="w-12 h-12 rounded-full bg-gray-700 border-2 border-indigo-500 overflow-hidden">
                     <img src="https://i.pravatar.cc/150?img=11" class="w-full h-full object-cover">
                 </div>
             </div>
-            
-            <div class="flex gap-4 mb-6">
-                <div class="glass flex-1 p-3 rounded-xl text-center">
-                    <p class="text-xs text-gray-400">Véhicule</p>
-                    <p class="font-bold">Scooter</p>
-                </div>
-                <div class="glass flex-1 p-3 rounded-xl text-center">
-                    <p class="text-xs text-gray-400">Plaque</p>
-                    <p class="font-bold">1234 TBC</p>
-                </div>
-            </div>
-
             <button onclick="cancelRide()" class="w-full py-3 rounded-xl glass text-red-400 font-medium">Annuler</button>
         </div>
     </div>
 
     <div class="screen" id="driverScreen">
         <div class="bg-gray-900 border-b border-gray-800 p-4 safe-top flex justify-between items-center">
-            <div>
-                <span class="text-xs font-bold bg-green-500/20 text-green-400 px-2 py-1 rounded uppercase">En Ligne</span>
-                <h1 class="font-bold text-lg mt-1">Espace Chauffeur</h1>
-            </div>
+            <div><span class="text-xs font-bold bg-green-500/20 text-green-400 px-2 py-1 rounded uppercase">En Ligne</span><h1 class="font-bold text-lg mt-1">Espace Prestataire</h1></div>
             <button onclick="refreshRequests()" class="w-10 h-10 glass rounded-full flex items-center justify-center"><i class="fas fa-sync-alt"></i></button>
         </div>
-        
-        <div id="requestList" class="p-4 space-y-3 overflow-y-auto flex-1">
-            <div class="text-center mt-20 opacity-30">
-                <i class="fas fa-radar text-4xl mb-4"></i>
-                <p>Recherche de clients...</p>
-            </div>
-        </div>
-
-        <div class="bg-black/50 p-2 text-center">
-            <p class="text-xs font-mono text-gray-500" id="gpsStatus">GPS: Standby</p>
-        </div>
+        <div id="requestList" class="p-4 space-y-3 overflow-y-auto flex-1"></div>
+        <div class="bg-black/50 p-2 text-center"><p class="text-xs font-mono text-gray-500" id="gpsStatus">GPS: Standby</p></div>
     </div>
 
     <div id="toast" class="toast glass-panel px-6 py-4 rounded-full flex items-center gap-3 shadow-2xl border border-indigo-500/30">
-        <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center">
-            <i class="fas fa-bell text-white text-sm"></i>
-        </div>
+        <div class="w-8 h-8 rounded-full bg-indigo-500 flex items-center justify-center"><i class="fas fa-bell text-white text-sm"></i></div>
         <span class="font-medium text-sm" id="toastMsg">Notification</span>
     </div>
 
-    <script>
-        // --- CONFIGURATION ---
-        const SUPABASE_URL = 'https://ezlwdyvpyerxgrrvxdwl.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV6bHdkeXZweWVyeGdycnZ4ZHdsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU2ODMzNjAsImV4cCI6MjA4MTI1OTM2MH0.6ZFmMAF5rzZ6-XP5Owae-v_SEEnySUScPAyXqRHDiiA';
-        const { createClient } = supabase;
-        const db = createClient(SUPABASE_URL, SUPABASE_KEY);
-
-        // --- STATE ---
-        let role = 'client';
-        let map = null, carMarker = null;
-        let gpsInterval = null;
-
-        // --- NAVIGATION SYSTEM ---
-        function nav(screenId) {
-            document.querySelectorAll('.screen').forEach(el => el.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        setTimeout(() => nav('loginScreen'), 2000); // Splash delay
-
-        // --- AUTH SYSTEM ---
-        function toggleDriverMode() {
-            role = role === 'client' ? 'driver' : 'client';
-            const txt = document.getElementById('driverModeText');
-            if(role === 'driver') {
-                txt.innerText = "Mode Chauffeur : ACTIF";
-                txt.classList.add('text-green-400');
-            } else {
-                txt.innerText = "Passer en mode Chauffeur";
-                txt.classList.remove('text-green-400');
-            }
-        }
-
-        async function authLogin() {
-            const phone = document.getElementById('phoneInput').value;
-            if(phone.length < 5) return toast("Numéro trop court");
-            
-            const btn = document.querySelector('#loginScreen button');
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-            
-            // Simulation Auth pour rapidité (Email fake basé sur tel)
-            const email = phone.replace(/\D/g,'') + (role==='driver' ? '@driver.mk' : '@client.mk');
-            const password = 'password123';
-
-            let { error } = await db.auth.signInWithPassword({ email, password });
-            if(error) await db.auth.signUp({ email, password }); // Auto signup
-
-            btn.innerHTML = 'Connexion';
-            
-            if(role === 'driver') {
-                nav('driverScreen');
-                refreshRequests();
-            } else {
-                nav('homeScreen');
-            }
-        }
-
-        // --- MAP SYSTEM (LEAFLET) ---
-        function openMapMode() {
-            nav('mapScreen');
-            setTimeout(initMap, 100);
-        }
-
-        function initMap() {
-            if(map) return;
-            
-            // Init Tana Coordinates
-            map = L.map('map-view', { zoomControl: false }).setView([-18.8792, 47.5079], 14);
-            
-            // Dark Mode Map Tiles
-            L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-                attribution: '&copy; OpenStreetMap &copy; CARTO',
-                subdomains: 'abcd',
-                maxZoom: 19
-            }).addTo(map);
-
-            // Logic Pin Mobile
-            let timer;
-            map.on('movestart', () => {
-                document.getElementById('mapPin').classList.add('hovering');
-                document.getElementById('addressBadge').innerText = "Sélection...";
-            });
-            
-            map.on('moveend', () => {
-                document.getElementById('mapPin').classList.remove('hovering');
-                clearTimeout(timer);
-                timer = setTimeout(reverseGeocode, 600);
-            });
-        }
-
-        async function reverseGeocode() {
-            const center = map.getCenter();
-            document.getElementById('destInput').value = "Chargement...";
-            
-            try {
-                const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}`);
-                const data = await res.json();
-                const cleanAddr = data.address.road || data.address.suburb || "Position repère";
-                
-                document.getElementById('destInput').value = cleanAddr;
-                document.getElementById('addressBadge').innerText = cleanAddr;
-            } catch(e) {
-                document.getElementById('destInput').value = "Position GPS";
-            }
-        }
-
-        // --- RIDE LOGIC (REALTIME) ---
-        async function createRequest() {
-            const dest = document.getElementById('destInput').value;
-            const btn = document.getElementById('btnRequest');
-            
-            if(dest.includes("Chargement")) return toast("Attendez la localisation...");
-            
-            btn.innerHTML = '<i class="fas fa-circle-notch fa-spin mr-2"></i> Recherche...';
-            
-            const { data: { user } } = await db.auth.getUser();
-            const { data, error } = await db.from('rides').insert([{
-                client_id: user.id,
-                destination_address: dest,
-                service_type: 'course',
-                status: 'pending'
-            }]).select();
-
-            if(!error) {
-                const rideId = data[0].id;
-                toast("Demande envoyée aux chauffeurs !");
-                subscribeToRide(rideId);
-            } else {
-                toast("Erreur réseau");
-                btn.innerText = "Trouver un chauffeur";
-            }
-        }
-
-        function subscribeToRide(rideId) {
-            db.channel('ride-'+rideId)
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'rides', filter: `id=eq.${rideId}` }, payload => {
-                const ride = payload.new;
-                if(ride.status === 'accepted') {
-                    // Switch UI
-                    document.getElementById('orderSheet').classList.remove('open');
-                    document.getElementById('trackingSheet').classList.add('open');
-                    document.getElementById('mapPin').classList.add('hidden'); // Cache le pin de sélection
-                    toast("Un chauffeur a accepté !");
-                }
-                if(ride.driver_lat) updateCar(ride.driver_lat, ride.driver_lng);
-            })
-            .subscribe();
-        }
-
-        function updateCar(lat, lng) {
-            if(!carMarker) {
-                const carIcon = L.divIcon({
-                    html: '<div style="font-size:24px; color:#10b981; filter:drop-shadow(0 0 10px #10b981)"><i class="fas fa-car-side"></i></div>',
-                    className: 'bg-transparent', iconSize: [30,30]
-                });
-                carMarker = L.marker([lat, lng], {icon: carIcon}).addTo(map);
-            }
-            carMarker.setLatLng([lat, lng]);
-            map.flyTo([lat, lng], 16);
-        }
-
-        // --- DRIVER LOGIC ---
-        async function refreshRequests() {
-            const list = document.getElementById('requestList');
-            list.innerHTML = '<div class="text-center mt-10"><i class="fas fa-spinner fa-spin"></i></div>';
-            
-            const { data } = await db.from('rides').select('*').eq('status', 'pending').order('created_at', {ascending:false});
-            
-            list.innerHTML = "";
-            if(!data.length) list.innerHTML = "<div class='text-center opacity-50 mt-10'>Aucune demande...</div>";
-            
-            data.forEach(r => {
-                const item = document.createElement('div');
-                item.className = "glass p-4 rounded-xl mb-3 border-l-4 border-indigo-500 animate-pulse";
-                item.innerHTML = `
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h3 class="font-bold text-lg">${r.destination_address}</h3>
-                            <span class="text-xs bg-indigo-500/20 px-2 py-1 rounded text-indigo-300">VTC Immédiat</span>
-                        </div>
-                        <button onclick="acceptRide('${r.id}')" class="bg-indigo-600 px-4 py-2 rounded-lg font-bold text-sm shadow-lg">ACCEPTER</button>
-                    </div>
-                `;
-                list.appendChild(item);
-            });
-        }
-
-        async function acceptRide(rideId) {
-            const { data: { user } } = await db.auth.getUser();
-            await db.from('rides').update({ status: 'accepted', driver_id: user.id }).eq('id', rideId);
-            
-            toast("Course acceptée ! GPS Démarré.");
-            startGPS(rideId);
-            
-            // UI Update
-            document.getElementById('requestList').innerHTML = `
-                <div class="glass p-6 rounded-xl text-center border-2 border-green-500">
-                    <h2 class="text-2xl font-bold text-green-400 mb-2">COURSE EN COURS</h2>
-                    <div class="w-16 h-16 bg-green-500/20 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-                        <i class="fas fa-satellite-dish text-green-400 text-2xl"></i>
-                    </div>
-                    <p class="text-sm text-gray-400">Votre position est diffusée au client</p>
-                    <button onclick="stopGPS()" class="mt-6 w-full glass py-3 text-red-400 font-bold rounded-xl">TERMINER</button>
-                </div>
-            `;
-        }
-
-        // --- GPS ENGINE ---
-        function startGPS(rideId) {
-            if(!navigator.geolocation) return;
-            const status = document.getElementById('gpsStatus');
-            
-            gpsInterval = setInterval(() => {
-                navigator.geolocation.getCurrentPosition(pos => {
-                    const { latitude, longitude } = pos.coords;
-                    status.innerText = `GPS: ${latitude.toFixed(4)}, ${longitude.toFixed(4)}`;
-                    status.classList.add('text-green-400');
-                    
-                    // Send to Supabase
-                    db.from('rides').update({ driver_lat: latitude, driver_lng: longitude }).eq('id', rideId).then();
-                }, err => console.error(err), { enableHighAccuracy: true });
-            }, 3000);
-        }
-
-        function stopGPS() {
-            clearInterval(gpsInterval);
-            nav('driverScreen');
-            refreshRequests();
-            toast("Course terminée");
-        }
-
-        function cancelRide() {
-            nav('homeScreen');
-            toast("Course annulée");
-        }
-
-        function toast(msg) {
-            const el = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            el.classList.add('show');
-            setTimeout(() => el.classList.remove('show'), 3000);
-        }
-
-        function logout() { location.reload(); }
-    </script>
+    <script src="main.js"></script>
 </body>
 </html>
